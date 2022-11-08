@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Remind</string>
+
+    <string name="nav_open_drawer">Open navigation drawer</string>
+    <string name="nav_close_drawer">Close navigation drawer</string>
+
+    <string name="subheader_title">Categories</string>
+    <string name="main_first_item">Daily routine</string>
+    <string name="main_second_item">Sport</string>
+    <string name="main_third_item">Medicine</string>
+    <string name="main_fourth_item">Significant date</string>
+
+    <string name="labels_subheader_title">Additional features</string>
+    <string name="labels_first_item">Add a new category</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
