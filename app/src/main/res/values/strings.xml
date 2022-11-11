@@ -12,6 +12,17 @@
 
     <string name="labels_subheader_title">Additional features</string>
     <string name="labels_first_item">Add a new category</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="flActBtnToAddNotificationDesc">Add a new notification</string>
+    <string name="flActBtnToAddTimeDesc">Add time</string>
+
+    <string name="text_input_name_layout_hint">Name</string>
+    <string name="text_input_description_layout_hint">Description</string>
+
+    <string name="chip_every_day">Every day</string>
+    <string name="chip_every_week">Every week</string>
+    <string name="chip_particular_day">On a particular day</string>
+
+    <string name="exposed_dropdown_menu_hint">Selected times</string>
+
 </resources>
