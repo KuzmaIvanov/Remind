@@ -19,10 +19,13 @@
     <string name="text_input_name_layout_hint">Name</string>
     <string name="text_input_description_layout_hint">Description</string>
 
-    <string name="chip_every_day">Every day</string>
-    <string name="chip_every_week">Every week</string>
-    <string name="chip_particular_day">On a particular day</string>
+    <string name="radio_every_day">every day</string>
+    <string name="radio_every_week">every week</string>
+    <string name="radio_particular_day">once on a particular day</string>
 
     <string name="exposed_dropdown_menu_hint">Selected times</string>
-
+    
+    <string name="material_alert_dialog_title">Choose frequency of time</string>
+    <string name="accept">Accept</string>
+    <string name="cancel">Cancel</string>
 </resources>

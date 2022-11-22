@@ -10,8 +10,7 @@
         android:id="@+id/addCategoryItemRecyclerViewTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-        android:textSize="20sp"
+        android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="20:00" />
@@ -20,45 +19,9 @@
         android:id="@+id/addCategoryItemRecyclerViewDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
-        android:layout_marginStart="8dp"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/addCategoryItemRecyclerViewTime"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="12.06.2022" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addCategoryItemRecyclerViewTime"
-        app:singleLine="true"
-        app:singleSelection="true"
-        app:selectionRequired="true">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipEveryDay"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chip_every_day"
-            android:checked="true"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipEveryWeek"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chip_every_week" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipParticularDay"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chip_particular_day" />
-
-    </com.google.android.material.chip.ChipGroup>
+        tools:text="12.06.2022" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

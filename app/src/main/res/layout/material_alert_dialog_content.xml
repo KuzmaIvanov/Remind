@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/radioGroup"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <RadioButton
+        android:id="@+id/radioButtonEveryDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/radio_every_day"/>
+
+    <RadioButton
+        android:id="@+id/radioButtonEveryWeek"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/radio_every_week"/>
+
+    <RadioButton
+        android:id="@+id/radioButtonParticularDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/radio_particular_day"/>
+
+</RadioGroup>

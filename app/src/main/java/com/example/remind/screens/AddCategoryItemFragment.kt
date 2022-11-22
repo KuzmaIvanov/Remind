@@ -1,5 +1,6 @@
 package com.example.remind.screens
 
+import android.content.DialogInterface
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.format.DateFormat.is24HourFormat
@@ -9,9 +10,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.remind.App
+import com.example.remind.R
 import com.example.remind.adapters.AddCategoryItemAdapter
 import com.example.remind.adapters.AddCategoryItemListener
 import com.example.remind.databinding.FragmentAddCategoryItemBinding
+import com.example.remind.model.CalendarItem
+import com.example.remind.model.CalendarItemService
+import com.example.remind.model.CalendarItemsListener
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -20,8 +28,14 @@ class AddCategoryItemFragment : Fragment() {
 
     private var _binding: FragmentAddCategoryItemBinding? = null
     private val binding get() = _binding!!
-    private val listOfFullDates: MutableList<Calendar> = ArrayList()
     private lateinit var addCategoryItemRecView: RecyclerView
+    private lateinit var adapter: AddCategoryItemAdapter
+
+    private val calendarItemService: CalendarItemService
+        get() = (activity?.applicationContext as App).chipGroupCalendarItemsService
+
+    private var increment = 1
+        get() = field++
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,24 +43,53 @@ class AddCategoryItemFragment : Fragment() {
     ): View? {
         _binding = FragmentAddCategoryItemBinding.inflate(inflater, container, false)
         val addTimeButton: ExtendedFloatingActionButton = binding.flActBtnToAddTime
+
         addCategoryItemRecView = binding.addCategoryItemRecyclerView
-        addCategoryItemRecView.layoutManager = LinearLayoutManager(requireContext())
-        addCategoryItemRecView.adapter = AddCategoryItemAdapter(listOfFullDates, object: AddCategoryItemListener {
-            override fun onCategoryItemDelete(calendar: Calendar) {
-                val calendarForRemoveIndex:Int = listOfFullDates.indexOfFirst {
-                    it == calendar
-                }
-                listOfFullDates.removeAt(calendarForRemoveIndex)
-                addCategoryItemRecView.adapter?.notifyItemRemoved(calendarForRemoveIndex)
+        adapter = AddCategoryItemAdapter(object : AddCategoryItemListener {
+            override fun onCategoryItemDelete(calendarItem: CalendarItem) {
+                calendarItemService.deleteItem(calendarItem)
             }
 
+            override fun onCategoryItemChange(calendarItem: CalendarItem) {
+                openMaterialAlertDialog(calendarItem)
+            }
         })
+        addCategoryItemRecView.layoutManager = LinearLayoutManager(requireContext())
+        addCategoryItemRecView.adapter = adapter
+
+        val divider = MaterialDividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
+        addCategoryItemRecView.addItemDecoration(divider)
+
+        calendarItemService.addListener(calendarItemsListener)
 
         addTimeButton.setOnClickListener {
             openTimePicker()
         }
 
         return binding.root
+    }
+
+    private fun openMaterialAlertDialog(calendarItem: CalendarItem) {
+        val arrayOfOptions = arrayOf<String>(
+            resources.getString(R.string.radio_every_day),
+            resources.getString(R.string.radio_every_week),
+            resources.getString(R.string.radio_particular_day)
+        )
+        var choice: String = arrayOfOptions[0]
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.material_alert_dialog_title)
+            .setSingleChoiceItems(arrayOfOptions, 0, DialogInterface.OnClickListener { _, i ->
+                choice = arrayOfOptions[i]
+            })
+            .setPositiveButton(resources.getString(R.string.accept)) { dialog, _ ->
+                calendarItemService.changeItem(calendarItem, choice)
+                adapter.notifyDataSetChanged()
+                dialog.dismiss()
+            }
+            .setNegativeButton(resources.getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun openTimePicker() {
@@ -69,13 +112,24 @@ class AddCategoryItemFragment : Fragment() {
             calendar.set(Calendar.MINUTE, picker.minute)
             calendar.set(Calendar.SECOND, 0)
             calendar.set(Calendar.MILLISECOND, 0);
-            listOfFullDates.add(calendar)
-            addCategoryItemRecView.adapter?.notifyItemInserted(listOfFullDates.size - 1)
+            calendarItemService.addItem(
+                CalendarItem(
+                increment,
+                calendar,
+                isEveryDay = true,
+                isEveryWeek = false,
+                isOnceOnAParticularDay = false)
+            )
         }
+    }
+
+    private val calendarItemsListener: CalendarItemsListener = {
+        adapter.listCalendarItem = it
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        calendarItemService.removeListener(calendarItemsListener)
         _binding = null
     }
 }

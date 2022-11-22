@@ -5,19 +5,51 @@ import android.icu.util.Calendar
 import android.text.format.DateFormat.is24HourFormat
 import android.view.*
 import androidx.appcompat.widget.PopupMenu
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.remind.databinding.ItemAddCategoryRecyclerViewBinding
+import com.example.remind.model.CalendarItem
 
 interface AddCategoryItemListener {
-    fun onCategoryItemDelete(calendar: Calendar)
+    fun onCategoryItemDelete(calendarItem: CalendarItem)
+    fun onCategoryItemChange(calendarItem: CalendarItem)
+}
+
+class AddCategoryItemDiffCallBack(
+    private val oldList: List<CalendarItem>,
+    private val newList: List<CalendarItem>
+): DiffUtil.Callback() {
+
+    override fun getOldListSize(): Int = oldList.size
+
+    override fun getNewListSize(): Int = newList.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val oldChipGroupCalendar = oldList[oldItemPosition]
+        val newChipGroupCalendar = newList[newItemPosition]
+        return oldChipGroupCalendar.id == newChipGroupCalendar.id
+    }
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        val oldChipGroupCalendar = oldList[oldItemPosition]
+        val newChipGroupCalendar = newList[newItemPosition]
+        return oldChipGroupCalendar == newChipGroupCalendar
+    }
 }
 
 class AddCategoryItemAdapter(
-    private val fullDateList: List<Calendar>,
     private val addCategoryItemListener: AddCategoryItemListener
 ) : RecyclerView.Adapter<AddCategoryItemAdapter.AddCategoryItemViewHolder>(), View.OnLongClickListener {
 
     private lateinit var ourContext: Context
+
+    var listCalendarItem: List<CalendarItem> = emptyList()
+        set(newValue) {
+            val diffCallback = AddCategoryItemDiffCallBack(field, newValue)
+            val diffResult = DiffUtil.calculateDiff(diffCallback)
+            field = newValue
+            diffResult.dispatchUpdatesTo(this)
+        }
 
     class AddCategoryItemViewHolder(
         val binding: ItemAddCategoryRecyclerViewBinding
@@ -44,19 +76,30 @@ class AddCategoryItemAdapter(
         return readyFullTime.toString()
     }
 
+    private fun showDate(calendarItem: CalendarItem): String {
+        return if(calendarItem.isEveryDay) {
+            "Every day"
+        } else if (calendarItem.isEveryWeek) {
+            "Every week"
+        } else {
+            "Once on a particular day"
+        }
+    }
+
     override fun onBindViewHolder(holder: AddCategoryItemViewHolder, position: Int) {
-        val fullDate = fullDateList[position]
+        val chipGroupCalendarItem = listCalendarItem[position]
         with(holder.binding) {
-            holder.itemView.tag = fullDate
+            holder.itemView.tag = chipGroupCalendarItem
             addCategoryItemRecyclerViewTime.text = getReadyFullTime(
-                if (is24HourFormat(ourContext)) fullDate.get(Calendar.HOUR_OF_DAY) else fullDate.get(Calendar.HOUR),
-                fullDate.get(Calendar.MINUTE)
+                if (is24HourFormat(ourContext)) chipGroupCalendarItem.calendar.get(Calendar.HOUR_OF_DAY) else chipGroupCalendarItem.calendar.get(Calendar.HOUR),
+                chipGroupCalendarItem.calendar.get(Calendar.MINUTE)
             )
+            addCategoryItemRecyclerViewDate.text = showDate(chipGroupCalendarItem)
         }
     }
 
     override fun getItemCount(): Int {
-        return fullDateList.size
+        return listCalendarItem.size
     }
 
     override fun onLongClick(p0: View): Boolean {
@@ -65,14 +108,18 @@ class AddCategoryItemAdapter(
     }
 
     private fun showPopupMenu(view: View) {
-        val calendar = view.tag as Calendar
+        val calendarItemItem = view.tag as CalendarItem
         val popupMenu = PopupMenu(view.context, view)
         popupMenu.menu.add(0, ID_REMOVE, Menu.NONE, "remove")
-        popupMenu.gravity = Gravity.END
+        popupMenu.menu.add(1, ID_CHANGE, Menu.NONE, "change")
+        //popupMenu.gravity = Gravity.END
         popupMenu.setOnMenuItemClickListener {
             when(it.itemId) {
                 ID_REMOVE -> {
-                    addCategoryItemListener.onCategoryItemDelete(calendar)
+                    addCategoryItemListener.onCategoryItemDelete(calendarItemItem)
+                }
+                ID_CHANGE -> {
+                    addCategoryItemListener.onCategoryItemChange(calendarItemItem)
                 }
             }
             return@setOnMenuItemClickListener true
@@ -82,5 +129,7 @@ class AddCategoryItemAdapter(
 
     companion object {
         private const val ID_REMOVE = 1
+        private const val ID_CHANGE = 2
     }
+
 }
