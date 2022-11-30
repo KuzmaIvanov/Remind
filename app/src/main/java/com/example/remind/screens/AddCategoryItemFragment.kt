@@ -1,6 +1,5 @@
 package com.example.remind.screens
 
-import android.content.DialogInterface
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.format.DateFormat.is24HourFormat
@@ -18,11 +17,14 @@ import com.example.remind.databinding.FragmentAddCategoryItemBinding
 import com.example.remind.model.CalendarItem
 import com.example.remind.model.CalendarItemService
 import com.example.remind.model.CalendarItemsListener
+import com.example.remind.utils.CalendarUtils
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import java.util.*
 
 class AddCategoryItemFragment : Fragment() {
 
@@ -70,19 +72,68 @@ class AddCategoryItemFragment : Fragment() {
     }
 
     private fun openMaterialAlertDialog(calendarItem: CalendarItem) {
-        val arrayOfOptions = arrayOf<String>(
-            resources.getString(R.string.radio_every_day),
-            resources.getString(R.string.radio_every_week),
-            resources.getString(R.string.radio_particular_day)
+        val everyDayString = resources.getString(R.string.radio_every_day)
+        val everyWeekString = resources.getString(R.string.radio_every_week)
+        val onceParticularDayString = resources.getString(R.string.radio_particular_day)
+        val arrayOfOptions = arrayOf(
+            everyDayString,
+            everyWeekString,
+            onceParticularDayString
         )
         var choice: String = arrayOfOptions[0]
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.material_alert_dialog_title)
-            .setSingleChoiceItems(arrayOfOptions, 0, DialogInterface.OnClickListener { _, i ->
+            .setSingleChoiceItems(arrayOfOptions, 0) { _, i ->
                 choice = arrayOfOptions[i]
-            })
+            }
             .setPositiveButton(resources.getString(R.string.accept)) { dialog, _ ->
-                calendarItemService.changeItem(calendarItem, choice)
+                val hour = calendarItem.calendar.get(Calendar.HOUR_OF_DAY)
+                val minute = calendarItem.calendar.get(Calendar.MINUTE)
+                when(choice) {
+                    everyDayString -> {
+                        calendarItem.calendar.time = Calendar.getInstance().time
+                        calendarItem.calendar.set(Calendar.HOUR_OF_DAY, hour)
+                        calendarItem.calendar.set(Calendar.MINUTE, minute)
+                        calendarItem.calendar.set(Calendar.SECOND, 0)
+                        calendarItem.calendar.set(Calendar.MILLISECOND, 0)
+                        calendarItemService.changeItem(calendarItem, choice)
+                        adapter.notifyDataSetChanged()
+                    }
+                    everyWeekString -> {
+                        calendarItem.calendar.time = Calendar.getInstance().time
+                        calendarItem.calendar.set(Calendar.HOUR_OF_DAY, hour)
+                        calendarItem.calendar.set(Calendar.MINUTE, minute)
+                        calendarItem.calendar.set(Calendar.SECOND, 0)
+                        calendarItem.calendar.set(Calendar.MILLISECOND, 0)
+                        openDayPicker(calendarItem, choice)
+                    }
+                    onceParticularDayString -> {
+                        openDatePicker(calendarItem, onceParticularDayString)
+                    }
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton(resources.getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+
+
+    private fun openDayPicker(calendarItem: CalendarItem, ch: String) {
+        val arrayOfDays = arrayOf(
+            "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
+        )
+        var choice: String = arrayOfDays[0]
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Choose your day of week:")
+            .setSingleChoiceItems(arrayOfDays, 0) { _, i ->
+                choice = arrayOfDays[i]
+            }
+            .setPositiveButton(resources.getString(R.string.accept)) { dialog, _ ->
+                calendarItem.calendar.set(Calendar.DAY_OF_WEEK, CalendarUtils.convertDayStringToInt(choice))
+                calendarItemService.changeItem(calendarItem, ch)
                 adapter.notifyDataSetChanged()
                 dialog.dismiss()
             }
@@ -90,6 +141,24 @@ class AddCategoryItemFragment : Fragment() {
                 dialog.dismiss()
             }
             .show()
+
+    }
+
+    private fun openDatePicker(calendarItem: CalendarItem, choice: String) {
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("Select your date:")
+            .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+            .build()
+        datePicker.show(childFragmentManager, "date_picker")
+        datePicker.addOnPositiveButtonClickListener {
+            val calendar = Calendar.getInstance()
+            calendar.time = Date(it)
+            calendarItem.calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR))
+            calendarItem.calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH))
+            calendarItem.calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH))
+            calendarItemService.changeItem(calendarItem, choice)
+            adapter.notifyDataSetChanged()
+        }
     }
 
     private fun openTimePicker() {
@@ -111,7 +180,7 @@ class AddCategoryItemFragment : Fragment() {
             }
             calendar.set(Calendar.MINUTE, picker.minute)
             calendar.set(Calendar.SECOND, 0)
-            calendar.set(Calendar.MILLISECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0)
             calendarItemService.addItem(
                 CalendarItem(
                 increment,

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.remind.databinding.ItemAddCategoryRecyclerViewBinding
 import com.example.remind.model.CalendarItem
+import com.example.remind.utils.CalendarUtils
 
 interface AddCategoryItemListener {
     fun onCategoryItemDelete(calendarItem: CalendarItem)
@@ -60,7 +61,7 @@ class AddCategoryItemAdapter(
         val inflater = LayoutInflater.from(parent.context)
         val binding = ItemAddCategoryRecyclerViewBinding.inflate(inflater, parent, false)
         binding.root.setOnLongClickListener(this)
-        return AddCategoryItemAdapter.AddCategoryItemViewHolder(binding)
+        return AddCategoryItemViewHolder(binding)
     }
 
     private fun getReadyFullTime(hour: Int, minutes: Int): String {
@@ -80,9 +81,10 @@ class AddCategoryItemAdapter(
         return if(calendarItem.isEveryDay) {
             "Every day"
         } else if (calendarItem.isEveryWeek) {
-            "Every week"
+            "Every ${CalendarUtils.convertDayIntToString(calendarItem.calendar.get(Calendar.DAY_OF_WEEK))}"
         } else {
-            "Once on a particular day"
+            "${calendarItem.calendar.get(Calendar.DAY_OF_MONTH)}-" +
+                    "${calendarItem.calendar.get(Calendar.MONTH) + 1}-${calendarItem.calendar.get(Calendar.YEAR)}"
         }
     }
 
@@ -112,7 +114,7 @@ class AddCategoryItemAdapter(
         val popupMenu = PopupMenu(view.context, view)
         popupMenu.menu.add(0, ID_REMOVE, Menu.NONE, "remove")
         popupMenu.menu.add(1, ID_CHANGE, Menu.NONE, "change")
-        //popupMenu.gravity = Gravity.END
+        popupMenu.gravity = Gravity.END
         popupMenu.setOnMenuItemClickListener {
             when(it.itemId) {
                 ID_REMOVE -> {
