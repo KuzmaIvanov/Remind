@@ -28,4 +28,7 @@
     <string name="material_alert_dialog_title">Choose frequency of time</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
+
+    <string name="save_category_item_text">Save a notification</string>
+    <string name="clear_category_item_text">Clear a notification</string>
 </resources>

@@ -3,20 +3,21 @@ package com.example.remind.screens
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.format.DateFormat.is24HourFormat
+import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.remind.App
 import com.example.remind.R
 import com.example.remind.adapters.AddCategoryItemAdapter
 import com.example.remind.adapters.AddCategoryItemListener
+import com.example.remind.database.MyDbHelper
 import com.example.remind.databinding.FragmentAddCategoryItemBinding
 import com.example.remind.model.CalendarItem
 import com.example.remind.model.CalendarItemService
 import com.example.remind.model.CalendarItemsListener
+import com.example.remind.model.CategoryItem
 import com.example.remind.utils.CalendarUtils
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -32,6 +33,7 @@ class AddCategoryItemFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var addCategoryItemRecView: RecyclerView
     private lateinit var adapter: AddCategoryItemAdapter
+    private lateinit var dbTableName: String
 
     private val calendarItemService: CalendarItemService
         get() = (activity?.applicationContext as App).chipGroupCalendarItemsService
@@ -39,11 +41,22 @@ class AddCategoryItemFragment : Fragment() {
     private var increment = 1
         get() = field++
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.save_delete_category_item_menu, menu)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentAddCategoryItemBinding.inflate(inflater, container, false)
+        dbTableName = requireArguments().getString("db_table_name")!!
+
         val addTimeButton: ExtendedFloatingActionButton = binding.flActBtnToAddTime
 
         addCategoryItemRecView = binding.addCategoryItemRecyclerView
@@ -118,8 +131,6 @@ class AddCategoryItemFragment : Fragment() {
             }
             .show()
     }
-
-
 
     private fun openDayPicker(calendarItem: CalendarItem, ch: String) {
         val arrayOfDays = arrayOf(
@@ -196,9 +207,35 @@ class AddCategoryItemFragment : Fragment() {
         adapter.listCalendarItem = it
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_save -> {
+                if(calendarItemService.count() != 0 && binding.inputNameTextInputEditText.text.toString() != "") {
+                    val name: String = binding.inputNameTextInputEditText.text.toString()
+                    val description: String = binding.inputDescriptionTextInputEditText.text.toString()
+                    val categoryItem = CategoryItem(0, name, description, calendarItemService.getItems())
+                    val dbHelper = MyDbHelper(requireContext())
+                    dbHelper.addCategoryItem(categoryItem, dbTableName)
+                    Toast.makeText(requireContext(), "Added!", Toast.LENGTH_SHORT).show()
+                    //добавить переброс
+                } else {
+                    Toast.makeText(requireContext(), "Please enter name and add time if necessary", Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
+            R.id.action_clear -> {
+                calendarItemService.clearItems()
+                adapter.notifyDataSetChanged()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         calendarItemService.removeListener(calendarItemsListener)
         _binding = null
     }
+
 }

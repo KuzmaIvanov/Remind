@@ -1,6 +1,6 @@
 package com.example.remind.model
 
-typealias CalendarItemsListener = (items: List<CalendarItem>) -> Unit
+typealias CalendarItemsListener = (items: MutableList<CalendarItem>) -> Unit
 
 class CalendarItemService {
 
@@ -8,9 +8,15 @@ class CalendarItemService {
 
     private val listeners = mutableSetOf<CalendarItemsListener>()
 
-    fun getItems(): List<CalendarItem> {
+    fun getItems(): MutableList<CalendarItem> {
         return items
     }
+
+    fun clearItems() {
+        items.clear()
+    }
+
+    fun count(): Int = items.size
 
     fun deleteItem(item: CalendarItem) {
         val indexToDelete = items.indexOfFirst { it.id == item.id }
