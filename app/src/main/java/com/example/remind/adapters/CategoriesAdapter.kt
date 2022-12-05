@@ -1,12 +1,19 @@
 package com.example.remind.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.remind.databinding.ItemCategoriesBinding
 import com.example.remind.model.CategoryItem
 
-class CategoriesAdapter: RecyclerView.Adapter<CategoriesAdapter.CategoriesViewHolder>() {
+interface CategoriesActionListener {
+    fun onCategoryItemDetails(categoryItem: CategoryItem)
+}
+
+class CategoriesAdapter(
+    private val actionListener: CategoriesActionListener
+): RecyclerView.Adapter<CategoriesAdapter.CategoriesViewHolder>(), View.OnClickListener {
 
     private var items: ArrayList<CategoryItem> = ArrayList()
 
@@ -22,6 +29,7 @@ class CategoriesAdapter: RecyclerView.Adapter<CategoriesAdapter.CategoriesViewHo
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoriesViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ItemCategoriesBinding.inflate(inflater, parent, false)
+        binding.root.setOnClickListener(this)
         return CategoriesViewHolder(binding)
     }
 
@@ -35,5 +43,10 @@ class CategoriesAdapter: RecyclerView.Adapter<CategoriesAdapter.CategoriesViewHo
     }
 
     override fun getItemCount(): Int = items.size
+
+    override fun onClick(p0: View) {
+        val categoryItem = p0.tag as CategoryItem
+        actionListener.onCategoryItemDetails(categoryItem)
+    }
 
 }

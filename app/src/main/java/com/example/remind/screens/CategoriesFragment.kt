@@ -8,11 +8,16 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.remind.R
+import com.example.remind.adapters.CalendarItemJsonAdapter
+import com.example.remind.adapters.CategoriesActionListener
 import com.example.remind.adapters.CategoriesAdapter
 import com.example.remind.database.MyDbHelper
 import com.example.remind.databinding.FragmentCategoriesBinding
+import com.example.remind.model.CalendarItem
+import com.example.remind.model.CategoryItem
 import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.gson.GsonBuilder
 
 class CategoriesFragment : Fragment() {
 
@@ -27,7 +32,6 @@ class CategoriesFragment : Fragment() {
     ): View? {
         _binding = FragmentCategoriesBinding.inflate(inflater, container, false)
         val dbTableName = requireArguments().getString("db_table_name")!!
-
         initRecyclerView()
 
         val dbHelper = MyDbHelper(requireContext())
@@ -50,7 +54,23 @@ class CategoriesFragment : Fragment() {
 
     private fun initRecyclerView() {
         categoriesRecyclerView = binding.categoriesRecyclerView
-        adapter = CategoriesAdapter()
+        adapter = CategoriesAdapter(object : CategoriesActionListener{
+            override fun onCategoryItemDetails(categoryItem: CategoryItem) {
+                val fragment = CategoryItemDetailsFragment()
+                val bundle = Bundle()
+                val gsonBuilder = GsonBuilder()
+                gsonBuilder.registerTypeAdapter(CalendarItem::class.java, CalendarItemJsonAdapter())
+                val gson = gsonBuilder.create()
+                bundle.putString("name", categoryItem.name)
+                bundle.putString("description", categoryItem.description)
+                bundle.putString("calendarItem", gson.toJson(categoryItem.listCalendarItem))
+                fragment.arguments = bundle
+                requireActivity().supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.rootForFragment, fragment)
+                    .commit()
+            }
+        })
         categoriesRecyclerView.adapter = adapter
         categoriesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         val divider = MaterialDividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)

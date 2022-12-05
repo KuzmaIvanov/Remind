@@ -8,6 +8,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
+import androidx.navigation.ui.AppBarConfiguration
 import com.example.remind.databinding.ActivityMainBinding
 import com.example.remind.screens.AddCategoryActivity
 import com.example.remind.screens.CategoriesFragment
@@ -17,6 +18,7 @@ import com.google.android.material.navigation.NavigationView
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +48,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 it.arguments = bundle
             })
             .commit()
+
     }
     private fun getDbTableName(id: Int): String {
         return when(id) {

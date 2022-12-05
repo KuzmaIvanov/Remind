@@ -6,7 +6,7 @@ import com.google.gson.*
 import java.lang.reflect.Type
 import java.util.*
 
-class CategoryItemJsonAdapter: JsonSerializer<CalendarItem>, JsonDeserializer<CalendarItem> {
+class CalendarItemJsonAdapter: JsonSerializer<CalendarItem>, JsonDeserializer<CalendarItem> {
     override fun serialize(
         src: CalendarItem?,
         typeOfSrc: Type?,
