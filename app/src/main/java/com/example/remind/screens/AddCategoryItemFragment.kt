@@ -1,13 +1,20 @@
 package com.example.remind.screens
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.format.DateFormat.is24HourFormat
+import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.remind.AlarmReceiver
 import com.example.remind.App
 import com.example.remind.R
 import com.example.remind.adapters.AddCategoryItemAdapter
@@ -215,9 +222,11 @@ class AddCategoryItemFragment : Fragment() {
                     val description: String = binding.inputDescriptionTextInputEditText.text.toString()
                     val categoryItem = CategoryItem(0, name, description, calendarItemService.getItems())
                     val dbHelper = MyDbHelper(requireContext())
-                    dbHelper.addCategoryItem(categoryItem, dbTableName)
+                    val idCategoryItemToAddAlarm: Long = dbHelper.addCategoryItem(categoryItem, dbTableName)
+                    backToCategoriesFragment()
+                    setAlarm(idCategoryItemToAddAlarm, name)
                     Toast.makeText(requireContext(), "Added!", Toast.LENGTH_SHORT).show()
-                    //добавить переброс
+                    calendarItemService.clearItems()
                 } else {
                     Toast.makeText(requireContext(), "Please enter name and add time if necessary", Toast.LENGTH_SHORT).show()
                 }
@@ -230,6 +239,39 @@ class AddCategoryItemFragment : Fragment() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun setAlarm(idCategoryItemToAddAlarm: Long, nameOfNotification: String) {
+        val context = requireContext()
+        val alarmManager: AlarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        var actionIncrement = 1;
+        calendarItemService.getItems().forEach {
+            val intent = Intent(context, AlarmReceiver::class.java)
+            intent.putExtra("title", nameOfNotification)
+            intent.putExtra("description", resources.getString(R.string.notification_content_text))
+            intent.putExtra("notificationID", idCategoryItemToAddAlarm.toInt())
+            intent.action = "action$dbTableName$actionIncrement"
+            val pendingIntent = PendingIntent.getBroadcast(context, idCategoryItemToAddAlarm.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            if(it.isEveryDay) {
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, it.calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
+            } else if (it.isEveryWeek) {
+                alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, it.calendar.timeInMillis, AlarmManager.INTERVAL_DAY*7, pendingIntent)
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, it.calendar.timeInMillis, pendingIntent)
+            }
+            actionIncrement++
+        }
+    }
+
+    private fun backToCategoriesFragment() {
+        val fragment = CategoriesFragment()
+        val bundle = Bundle()
+        bundle.putString("db_table_name", dbTableName)
+        fragment.arguments = bundle
+        requireActivity().supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.rootForFragment, fragment)
+            .commit()
     }
 
     override fun onDestroyView() {

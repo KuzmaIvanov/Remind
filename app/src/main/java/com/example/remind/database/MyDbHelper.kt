@@ -60,6 +60,14 @@ class MyDbHelper(context: Context):
         return success
     }
 
+    fun deleteCategoryItem(categoryItem: CategoryItem, tableName: String) {
+        val db = this.writableDatabase
+        val selection = "${BaseColumns._ID} = ?"
+        val selectionArgs = arrayOf("${categoryItem.id}")
+        db.delete(tableName, selection, selectionArgs)
+        db.close()
+    }
+
     fun getAllCategoryItem(tableName: String): ArrayList<CategoryItem> {
         val result: ArrayList<CategoryItem> = ArrayList()
         val selectQuery = "SELECT * FROM $tableName"

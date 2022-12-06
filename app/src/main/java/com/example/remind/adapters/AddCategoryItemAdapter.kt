@@ -110,7 +110,7 @@ class AddCategoryItemAdapter(
     }
 
     private fun showPopupMenu(view: View) {
-        val calendarItemItem = view.tag as CalendarItem
+        val calendarItem = view.tag as CalendarItem
         val popupMenu = PopupMenu(view.context, view)
         popupMenu.menu.add(0, ID_REMOVE, Menu.NONE, "remove")
         popupMenu.menu.add(1, ID_CHANGE, Menu.NONE, "change")
@@ -118,10 +118,10 @@ class AddCategoryItemAdapter(
         popupMenu.setOnMenuItemClickListener {
             when(it.itemId) {
                 ID_REMOVE -> {
-                    addCategoryItemListener.onCategoryItemDelete(calendarItemItem)
+                    addCategoryItemListener.onCategoryItemDelete(calendarItem)
                 }
                 ID_CHANGE -> {
-                    addCategoryItemListener.onCategoryItemChange(calendarItemItem)
+                    addCategoryItemListener.onCategoryItemChange(calendarItem)
                 }
             }
             return@setOnMenuItemClickListener true
