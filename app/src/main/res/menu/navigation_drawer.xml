@@ -39,7 +39,7 @@
                 android:id="@+id/labels_first_item"
                 android:title="@string/labels_first_item"
                 android:checkable="true"
-                android:icon="@drawable/ic_labels_first_item_24"
+                android:icon="@drawable/ic_baseline_settings_24"
                 app:showAsAction="ifRoom"/>
         </menu>
     </item>

@@ -7,10 +7,8 @@ import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.text.format.DateFormat.is24HourFormat
-import android.util.Log
 import android.view.*
 import android.widget.Toast
-import androidx.core.content.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -170,12 +168,19 @@ class AddCategoryItemFragment : Fragment() {
         datePicker.show(childFragmentManager, "date_picker")
         datePicker.addOnPositiveButtonClickListener {
             val calendar = Calendar.getInstance()
-            calendar.time = Date(it)
-            calendarItem.calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR))
-            calendarItem.calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH))
-            calendarItem.calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH))
-            calendarItemService.changeItem(calendarItem, choice)
-            adapter.notifyDataSetChanged()
+            if(Date(it).before(calendar.time)) {
+                Toast.makeText(requireContext(),"You have to enter right date!", Toast.LENGTH_SHORT).show()
+            } else {
+                calendar.time = Date(it)
+                calendarItem.calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR))
+                calendarItem.calendar.set(Calendar.MONTH, calendar.get(Calendar.MONTH))
+                calendarItem.calendar.set(
+                    Calendar.DAY_OF_MONTH,
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                )
+                calendarItemService.changeItem(calendarItem, choice)
+                adapter.notifyDataSetChanged()
+            }
         }
     }
 
@@ -252,9 +257,16 @@ class AddCategoryItemFragment : Fragment() {
             intent.putExtra("notificationID", idCategoryItemToAddAlarm.toInt())
             intent.action = "action$dbTableName$actionIncrement"
             val pendingIntent = PendingIntent.getBroadcast(context, idCategoryItemToAddAlarm.toInt(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val currentTime = Calendar.getInstance()
             if(it.isEveryDay) {
+                if(it.calendar.time.before(currentTime.time)) {
+                    it.calendar.set(Calendar.DAY_OF_WEEK, it.calendar.get(Calendar.DAY_OF_WEEK)+1)
+                }
                 alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, it.calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
             } else if (it.isEveryWeek) {
+                if(it.calendar.time.before(currentTime.time)) {
+                    it.calendar.set(Calendar.DAY_OF_MONTH, it.calendar.get(Calendar.DAY_OF_MONTH)+7)
+                }
                 alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, it.calendar.timeInMillis, AlarmManager.INTERVAL_DAY*7, pendingIntent)
             } else {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, it.calendar.timeInMillis, pendingIntent)

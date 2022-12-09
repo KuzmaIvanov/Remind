@@ -7,6 +7,8 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
@@ -56,6 +58,9 @@ class AlarmReceiver: BroadcastReceiver() {
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
+        val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        builder.setSound(alarmSound)
+
         with(NotificationManagerCompat.from(context)) {
             notify(id, builder.build())
         }
@@ -63,8 +68,8 @@ class AlarmReceiver: BroadcastReceiver() {
 
     private fun createNotificationChannel(context: Context) {
         val importance = NotificationManager.IMPORTANCE_HIGH
-        val channel = NotificationChannel("CHANNEL_ID", "CHANNEL_NAME", importance).apply {
-            description = "CHANNEL_DESCRIPTION"
+        val channel = NotificationChannel("CHANNEL_ID", "Notification channel", importance).apply {
+            description = "This is notification channel where you can configure notifications"
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             vibrationPattern = longArrayOf(1000,1000,1000,1000)
             enableVibration(true)
@@ -73,5 +78,6 @@ class AlarmReceiver: BroadcastReceiver() {
         val notificationManager: NotificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
+
     }
 }

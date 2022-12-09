@@ -11,7 +11,7 @@
     <string name="main_fourth_item">Significant date</string>
 
     <string name="labels_subheader_title">Additional features</string>
-    <string name="labels_first_item">Add a new category</string>
+    <string name="labels_first_item">Settings</string>
 
     <string name="flActBtnToAddNotificationDesc">Add a new notification</string>
     <string name="flActBtnToAddTimeDesc">Add time</string>
@@ -33,4 +33,10 @@
     <string name="clear_category_item_text">Clear a notification</string>
 
     <string name="notification_content_text">You have to remind something!</string>
+
+    <string name="action_clear_all">Clear all</string>
+
+    <string name="switch_night_theme">Dark mode</string>
+    <string name="text_view_general_settings">Display options</string>
+
 </resources>

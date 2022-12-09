@@ -101,4 +101,10 @@ class MyDbHelper(context: Context):
 
         return result
     }
+
+    fun deleteAllCategoryItems(tableName: String) {
+        val db = this.writableDatabase
+        db.execSQL("delete from $tableName");
+        db.close()
+    }
 }

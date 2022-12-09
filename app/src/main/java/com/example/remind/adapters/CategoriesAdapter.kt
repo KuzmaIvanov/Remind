@@ -4,7 +4,6 @@ import android.view.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.example.remind.databinding.ItemCategoriesBinding
-import com.example.remind.model.CalendarItem
 import com.example.remind.model.CategoryItem
 
 interface CategoriesActionListener {

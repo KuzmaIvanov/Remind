@@ -5,10 +5,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +19,7 @@ import com.example.remind.database.MyDbHelper
 import com.example.remind.databinding.FragmentCategoriesBinding
 import com.example.remind.model.CalendarItem
 import com.example.remind.model.CategoryItem
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.divider.MaterialDividerItemDecoration
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.GsonBuilder
@@ -32,6 +31,15 @@ class CategoriesFragment : Fragment() {
     private lateinit var categoriesRecyclerView: RecyclerView
     private lateinit var adapter: CategoriesAdapter
     private lateinit var dbTableName: String
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.more_item_menu,menu)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -104,6 +112,32 @@ class CategoriesFragment : Fragment() {
                 alarmManager.cancel(pendingIntent)
             }
             actionIncrement++
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_clear_all -> {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Delete all notifications")
+                    .setMessage("Are you sure you want to delete all notifications?")
+                    .setNeutralButton("Cancel") { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton("Yes") { dialog, which ->
+                        val dbHelper = MyDbHelper(requireContext())
+                        dbHelper.getAllCategoryItem(dbTableName).forEach {
+                            cancelAlarm(it)
+                        }
+                        dbHelper.deleteAllCategoryItems(dbTableName)
+                        adapter.addItems(dbHelper.getAllCategoryItem(dbTableName))
+                        dialog.dismiss()
+                        Toast.makeText(requireContext(), "Deleted successfully!", Toast.LENGTH_SHORT).show()
+                    }
+                    .show()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 

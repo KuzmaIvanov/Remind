@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.remind.databinding.ItemAddCategoryRecyclerViewBinding
 import com.example.remind.model.CalendarItem
-import com.example.remind.model.CategoryItem
 import com.example.remind.utils.CalendarUtils
 
 class DetailsAdapter : RecyclerView.Adapter<DetailsAdapter.DetailsViewHolder>() {
